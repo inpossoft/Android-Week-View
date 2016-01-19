@@ -53,7 +53,7 @@ public abstract class BaseActivity extends AppCompatActivity implements WeekView
 
             @Override
             public String interpretTime(int hour) {
-                String hourString = hour > 12 ? (hour - 12) + ":00\n" + " pm" : (hour == 0 ? "12:00 \n am" : hour + ":00" + "\n" + " am");
+                String hourString = hour > 12 ? (hour - 12) + ":00\n" + " pm" : (hour == 0 ? "12:00\n am" : hour + ":00" + "\n" + " am");
                 return hourString;
             }
         });
