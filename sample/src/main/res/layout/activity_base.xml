@@ -4,12 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".BaseActivity"
-    android:background="@android:color/darker_gray">
+    android:background="@android:color/white">
 
     <com.alamkanak.weekview.WeekView
         android:id="@+id/weekView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/darker_gray"
         app:eventTextColor="@android:color/white"
         app:textSize="12sp"
         app:hourHeight="50dp"
