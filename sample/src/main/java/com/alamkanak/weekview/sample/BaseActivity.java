@@ -52,13 +52,32 @@ public abstract class BaseActivity extends AppCompatActivity implements WeekView
             }
 
             @Override
+            public Calendar interpretStartDate() {
+                Calendar today = Calendar.getInstance();
+                today.set(Calendar.HOUR_OF_DAY, 0);
+                today.set(Calendar.MINUTE, 0);
+                today.set(Calendar.SECOND, 0);
+                today.set(Calendar.MILLISECOND, 0);
+                return today;
+            }
+
+            @Override
             public String interpretTime(int hour) {
                 String hourString = hour > 12 ? (hour - 12) + ":00\n" + " pm" : (hour == 0 ? "12:00\n am" : hour + ":00" + "\n" + " am");
                 return hourString;
             }
+
+            @Override
+            public int interpretStartTime() {
+                return 7;
+            }
+
+            @Override
+            public int interpretHours() {
+                return 13;
+            }
         });
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -137,8 +156,28 @@ public abstract class BaseActivity extends AppCompatActivity implements WeekView
             }
 
             @Override
+            public Calendar interpretStartDate() {
+                Calendar today = Calendar.getInstance();
+                today.set(Calendar.HOUR_OF_DAY, 0);
+                today.set(Calendar.MINUTE, 0);
+                today.set(Calendar.SECOND, 0);
+                today.set(Calendar.MILLISECOND, 0);
+                return today;
+            }
+
+            @Override
             public String interpretTime(int hour) {
                 return hour > 11 ? (hour - 12) + " PM" : (hour == 0 ? "12 AM" : hour + " AM");
+            }
+
+            @Override
+            public int interpretStartTime() {
+                return 7;
+            }
+
+            @Override
+            public int interpretHours() {
+                return 12;
             }
         });
     }

@@ -7,5 +7,8 @@ import java.util.Calendar;
  */
 public interface DateTimeInterpreter {
     String interpretDate(Calendar date);
+    Calendar interpretStartDate();
     String interpretTime(int hour);
+    int interpretStartTime();
+    int interpretHours();
 }
