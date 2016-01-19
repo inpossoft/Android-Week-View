@@ -39,22 +39,24 @@ public abstract class BaseActivity extends AppCompatActivity implements WeekView
         // Get a reference for the week view in the layout.
         mWeekView = (WeekView) findViewById(R.id.weekView);
 
-        // Show a toast message about the touched event.
-        mWeekView.setOnEventClickListener(this);
-
-        // The week view has infinite scrolling horizontally. We have to provide the events of a
-        // month every time the month changes on the week view.
         mWeekView.setMonthChangeListener(this);
+        mWeekView.setNumberOfVisibleDays(7);
+        mWeekView.setDateTimeInterpreter(new DateTimeInterpreter() {
+            @Override
+            public String interpretDate(Calendar date) {
+                SimpleDateFormat weekdayNameFormat = new SimpleDateFormat("E", Locale.getDefault());
+                String weekday = weekdayNameFormat.format(date.getTime());
+                SimpleDateFormat format = new SimpleDateFormat("d", Locale.getDefault());
 
-        // Set long press listener for events.
-        mWeekView.setEventLongPressListener(this);
+                return format.format(date.getTime()) + "\n" + weekday.toUpperCase();
+            }
 
-        // Set long press listener for empty view
-        mWeekView.setEmptyViewLongPressListener(this);
-
-        // Set up a date time interpreter to interpret how the date and time will be formatted in
-        // the week view. This is optional.
-        setupDateTimeInterpreter(false);
+            @Override
+            public String interpretTime(int hour) {
+                String hourString = hour > 12 ? (hour - 12) + ":00\n" + " pm" : (hour == 0 ? "12:00 \n am" : hour + ":00" + "\n" + " am");
+                return hourString;
+            }
+        });
     }
 
 

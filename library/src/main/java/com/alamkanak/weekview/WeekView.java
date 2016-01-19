@@ -492,11 +492,11 @@ public class WeekView extends View {
     }
 
     private void drawTimeColumnAndAxes(Canvas canvas) {
-        // Draw the background color for the header column.
-        canvas.drawRect(0, mHeaderTextHeight + mHeaderRowPadding * 2, mHeaderColumnWidth, getHeight(), mHeaderColumnBackgroundPaint);
-
         // Clip to paint in left column only.
-        canvas.clipRect(0, mHeaderTextHeight + mHeaderRowPadding * 2, mHeaderColumnWidth, getHeight(), Region.Op.REPLACE);
+        canvas.clipRect(0, mHeaderTextHeight + mHeaderRowPadding * 2, mHeaderColumnWidth - 2, getHeight(), Region.Op.REPLACE);
+
+        // Draw the background color for the header column.
+        canvas.drawRect(0, 0 , mHeaderColumnWidth - 2, getHeight(), mHeaderColumnBackgroundPaint);
 
         for (int i = 0; i < 24; i++) {
             float top = mHeaderTextHeight + mHeaderRowPadding * 2 + mCurrentOrigin.y + mHourHeight * i + mHeaderMarginBottom;
@@ -505,7 +505,16 @@ public class WeekView extends View {
             String time = getDateTimeInterpreter().interpretTime(i);
             if (time == null)
                 throw new IllegalStateException("A DateTimeInterpreter must not return null time");
-            if (top < getHeight()) canvas.drawText(time, mTimeTextWidth + mHeaderColumnPadding, top + mTimeTextHeight, mTimeTextPaint);
+
+            if (top < getHeight()) {
+                String newLine = "\n";
+                if (time.contains(newLine)) {
+                    canvas.drawText(time.substring(0, time.indexOf(newLine)), mTimeTextWidth * 3 / 4 + mHeaderColumnPadding, top + mTimeTextHeight + mHourHeight / 2 - mTimeTextHeight / 1.5f, mTimeTextPaint);
+                    canvas.drawText(time.substring(time.indexOf(newLine)), mTimeTextWidth * 3 / 4 + mHeaderColumnPadding, top + mTimeTextHeight + mHourHeight / 2 + mTimeTextHeight / 1.5f, mTimeTextPaint);
+                } else {
+                    canvas.drawText(time, mTimeTextWidth * 3 / 4 + mHeaderColumnPadding, top + mTimeTextHeight + mHourHeight / 2, mTimeTextPaint);
+                }
+            }
         }
     }
 
@@ -677,10 +686,10 @@ public class WeekView extends View {
 
 
         // Clip to paint header row only.
-        canvas.clipRect(mHeaderColumnWidth, 0, getWidth(), mHeaderTextHeight + mHeaderRowPadding * 2, Region.Op.REPLACE);
+        canvas.clipRect(0, 0, getWidth(), mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight - 1, Region.Op.REPLACE);
 
         // Draw the header background.
-        canvas.drawRect(0, 0, getWidth(), mHeaderTextHeight + mHeaderRowPadding * 2, mHeaderBackgroundPaint);
+        canvas.drawRect(0, 0, getWidth(), mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight - 1, mHeaderBackgroundPaint);
 
         // Draw the header row texts.
         startPixel = startFromPixel;
@@ -694,7 +703,15 @@ public class WeekView extends View {
             String dayLabel = getDateTimeInterpreter().interpretDate(day);
             if (dayLabel == null)
                 throw new IllegalStateException("A DateTimeInterpreter must not return null date");
-            canvas.drawText(dayLabel, startPixel + mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
+
+            String newLine = "\n";
+            if (dayLabel.contains(newLine)) {
+                canvas.drawText(dayLabel.substring(0, dayLabel.indexOf(newLine)), startPixel + mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding - mHeaderTextHeight / 1.5f, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
+                canvas.drawText(dayLabel.substring(dayLabel.indexOf(newLine)), startPixel + mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding + mHeaderTextHeight / 1.5f, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
+            } else {
+                canvas.drawText(dayLabel, startPixel + mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
+            }
+
             startPixel += mWidthPerDay + mColumnGap;
         }
 
