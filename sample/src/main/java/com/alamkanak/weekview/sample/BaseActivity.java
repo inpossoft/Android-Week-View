@@ -53,12 +53,7 @@ public abstract class BaseActivity extends AppCompatActivity implements WeekView
 
             @Override
             public Calendar interpretStartDate() {
-                Calendar today = Calendar.getInstance();
-                today.set(Calendar.HOUR_OF_DAY, 0);
-                today.set(Calendar.MINUTE, 0);
-                today.set(Calendar.SECOND, 0);
-                today.set(Calendar.MILLISECOND, 0);
-                return today;
+                return Calendar.getInstance();
             }
 
             @Override
@@ -157,12 +152,7 @@ public abstract class BaseActivity extends AppCompatActivity implements WeekView
 
             @Override
             public Calendar interpretStartDate() {
-                Calendar today = Calendar.getInstance();
-                today.set(Calendar.HOUR_OF_DAY, 0);
-                today.set(Calendar.MINUTE, 0);
-                today.set(Calendar.SECOND, 0);
-                today.set(Calendar.MILLISECOND, 0);
-                return today;
+                return Calendar.getInstance();
             }
 
             @Override

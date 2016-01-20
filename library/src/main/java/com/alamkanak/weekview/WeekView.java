@@ -605,7 +605,7 @@ public class WeekView extends View {
 
         // Iterate through each day.
         Calendar oldFirstVisibleDay = mFirstVisibleDay;
-        mFirstVisibleDay = (Calendar) today.clone();
+        mFirstVisibleDay = getDateTimeInterpreter().interpretStartDate();
         mFirstVisibleDay.add(Calendar.DATE, -(Math.round(mCurrentOrigin.x / (mWidthPerDay + mColumnGap))));
         if(!mFirstVisibleDay.equals(oldFirstVisibleDay) && mScrollListener != null){
             mScrollListener.onFirstVisibleDayChanged(mFirstVisibleDay, oldFirstVisibleDay);
@@ -699,8 +699,8 @@ public class WeekView extends View {
         startPixel = startFromPixel;
         for (int dayNumber = 0; dayNumber < mNumberOfVisibleDays; dayNumber++) {
             // Check if the day is today.
-            day = (Calendar) today.clone();
-            day.add(Calendar.DATE, dayNumber - 1);
+            day = getDateTimeInterpreter().interpretStartDate();
+            day.add(Calendar.DATE, dayNumber);
             boolean sameDay = isSameDay(day, today);
 
             // Draw the day labels.
