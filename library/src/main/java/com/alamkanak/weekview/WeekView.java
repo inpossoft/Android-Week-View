@@ -500,10 +500,27 @@ public class WeekView extends View {
 
     private void drawTimeColumnAndAxes(Canvas canvas) {
         // Clip to paint in left column only.
-        canvas.clipRect(0, mHeaderTextHeight + mHeaderRowPadding * 2, mHeaderColumnWidth - 2, getHeight(), Region.Op.REPLACE);
+        canvas.clipRect(0, mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight - 1, mHeaderColumnWidth - 2, getHeight(), Region.Op.REPLACE);
 
         // Draw the background color for the header column.
-        canvas.drawRect(0, 0 , mHeaderColumnWidth - 2, getHeight(), mHeaderColumnBackgroundPaint);
+        canvas.drawRect(0, 0, mHeaderColumnWidth - 2, getHeight(), mHeaderColumnBackgroundPaint);
+
+        // Prepare to iterate for each hour to draw the hour lines.
+        float[] hourLines = new float[getDateTimeInterpreter().interpretHours() * 4];
+
+        // Prepare the separator lines for hours.
+        int j = 0;
+        for (int hourNumber = 0; hourNumber < getDateTimeInterpreter().interpretHours(); hourNumber++) {
+            float top = mHeaderTextHeight + mHeaderRowPadding * 2 + mCurrentOrigin.y + mHourHeight * hourNumber + mTimeTextHeight/2 + mHeaderMarginBottom;
+            hourLines[j * 4] = 0;
+            hourLines[j * 4 + 1] = top;
+            hourLines[j * 4 + 2] = mHeaderColumnWidth;
+            hourLines[j * 4 + 3] = top;
+            j++;
+        }
+
+        // Draw the lines for hours.
+        canvas.drawLines(hourLines, mHourSeparatorPaint);
 
         for (int i = 0; i < getDateTimeInterpreter().interpretHours(); i++) {
             float top = mHeaderTextHeight + mHeaderRowPadding * 2 + mCurrentOrigin.y + mHourHeight * i + mHeaderMarginBottom;
