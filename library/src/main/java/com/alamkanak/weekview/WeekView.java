@@ -108,6 +108,7 @@ public class WeekView extends View {
     private int mHeaderColumnPadding = 10;
     private int mHeaderColumnTextColor = Color.BLACK;
     private int mNumberOfVisibleDays = 3;
+    private int mNumberOfVisibleDaysInHeader = 7;
     private int mHeaderRowPadding = 10;
     private int mHeaderRowBackgroundColor = Color.WHITE;
     private int mDayBackgroundColor = Color.rgb(245, 245, 245);
@@ -319,6 +320,7 @@ public class WeekView extends View {
             mColumnGap = a.getDimensionPixelSize(R.styleable.WeekView_columnGap, mColumnGap);
             mHeaderColumnTextColor = a.getColor(R.styleable.WeekView_headerColumnTextColor, mHeaderColumnTextColor);
             mNumberOfVisibleDays = a.getInteger(R.styleable.WeekView_noOfVisibleDays, mNumberOfVisibleDays);
+            mNumberOfVisibleDaysInHeader = a.getInteger(R.styleable.WeekView_noOfVisibleDaysInHeader, mNumberOfVisibleDaysInHeader);
             mHeaderRowPadding = a.getDimensionPixelSize(R.styleable.WeekView_headerRowPadding, mHeaderRowPadding);
             mHeaderRowBackgroundColor = a.getColor(R.styleable.WeekView_headerRowBackgroundColor, mHeaderRowBackgroundColor);
             mDayBackgroundColor = a.getColor(R.styleable.WeekView_dayBackgroundColor, mDayBackgroundColor);
@@ -721,7 +723,9 @@ public class WeekView extends View {
 
         // Draw the header row texts.
         startPixel = startFromPixel;
-        for (int dayNumber = 0; dayNumber < mNumberOfVisibleDays; dayNumber++) {
+        mWidthPerDay = getWidth() - mHeaderColumnWidth - mColumnGap * (mNumberOfVisibleDaysInHeader - 1);
+        mWidthPerDay = mWidthPerDay/mNumberOfVisibleDaysInHeader;
+        for (int dayNumber = 0; dayNumber < mNumberOfVisibleDaysInHeader; dayNumber++) {
             // Check if the day is today.
             day = getDateTimeInterpreter().interpretStartDate();
             day.add(Calendar.DATE, dayNumber);
@@ -1361,6 +1365,25 @@ public class WeekView extends View {
      */
     public void setNumberOfVisibleDays(int numberOfVisibleDays) {
         this.mNumberOfVisibleDays = numberOfVisibleDays;
+        mCurrentOrigin.x = 0;
+        mCurrentOrigin.y = 0;
+        invalidate();
+    }
+
+    /**
+     * Get the number of visible days in a week header.
+     * @return The number of visible days in a week header.
+     */
+    public int getNumberOfVisibleDaysInHeader() {
+        return mNumberOfVisibleDaysInHeader;
+    }
+
+    /**
+     * Set the number of visible days in a week header.
+     * @param numberOfVisibleDaysInHeader The number of visible days in a week header.
+     */
+    public void setNumberOfVisibleDaysInHeader(int numberOfVisibleDaysInHeader) {
+        this.mNumberOfVisibleDaysInHeader = numberOfVisibleDaysInHeader;
         mCurrentOrigin.x = 0;
         mCurrentOrigin.y = 0;
         invalidate();

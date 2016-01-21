@@ -16,7 +16,7 @@
         app:hourHeight="50dp"
         app:headerColumnPadding="0dp"
         app:headerColumnTextColor="#515151"
-        app:headerRowPadding="12dp"
+        app:headerRowPadding="15dp"
         app:columnGap="0.5dp"
         app:noOfVisibleDays="7"
         app:dayBackgroundColor="@android:color/white"
