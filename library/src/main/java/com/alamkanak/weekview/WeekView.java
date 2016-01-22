@@ -123,9 +123,10 @@ public class WeekView extends View {
     private int mTodayHeaderBackgroundColor = Color.WHITE;
     private int mHourSeparatorHeight = 2;
     private int mTodayHeaderTextColor = Color.rgb(39, 137, 228);
-    private int mEventTextSize = 12;
+    private int mEventTextSize = 10;
     private int mEventTextColor = Color.BLACK;
     private int mEventPadding = 8;
+    private int mEventColoredLineWidth = 15;
     private int mHeaderColumnBackgroundColor = Color.WHITE;
     private boolean mIsFirstDraw = true;
     private boolean mAreDimensionsInvalid = true;
@@ -797,11 +798,11 @@ public class WeekView extends View {
                 if (isSameDay(mEventRects.get(i).event.getStartTime(), date)) {
 
                     // Calculate top.
-                    float top = mHourHeight * getDateTimeInterpreter().interpretHours() * mEventRects.get(i).top / 1440 + mCurrentOrigin.y + mHeaderTextHeight + mHeaderRowPadding * 2 + mHeaderMarginBottom + mTimeTextHeight/2 + mEventMarginVertical;
+                    float top = mHourHeight * getDateTimeInterpreter().interpretHours() * mEventRects.get(i).top / (60 * getDateTimeInterpreter().interpretHours()) + mCurrentOrigin.y + mHeaderTextHeight + mHeaderRowPadding * 2 + mHeaderMarginBottom + mTimeTextHeight/2 + mEventMarginVertical;
 
                     // Calculate bottom.
                     float bottom = mEventRects.get(i).bottom;
-                    bottom = mHourHeight * getDateTimeInterpreter().interpretHours() * bottom / 1440 + mCurrentOrigin.y + mHeaderTextHeight + mHeaderRowPadding * 2 + mHeaderMarginBottom + mTimeTextHeight/2 - mEventMarginVertical;
+                    bottom = mHourHeight * getDateTimeInterpreter().interpretHours() * bottom / (60 * getDateTimeInterpreter().interpretHours()) + mCurrentOrigin.y + mHeaderTextHeight + mHeaderRowPadding * 2 + mHeaderMarginBottom + mTimeTextHeight/2 - mEventMarginVertical;
 
                     // Calculate left and right.
                     float left = startFromPixel + mEventRects.get(i).left * mWidthPerDay;
@@ -820,7 +821,8 @@ public class WeekView extends View {
                             ) {
                         mEventRects.get(i).rectF = new RectF(left, top, right, bottom);
                         mEventBackgroundPaint.setColor(mEventRects.get(i).event.getColor() == 0 ? mDefaultEventColor : mEventRects.get(i).event.getColor());
-                        canvas.drawRoundRect(mEventRects.get(i).rectF, mEventCornerRadius, mEventCornerRadius, mEventBackgroundPaint);
+                        RectF rect = new RectF(mEventRects.get(i).rectF.left, mEventRects.get(i).rectF.top, mEventRects.get(i).rectF.left + mEventColoredLineWidth, mEventRects.get(i).rectF.bottom);
+                        canvas.drawRoundRect(rect, mEventCornerRadius, mEventCornerRadius, mEventBackgroundPaint);
                         drawEventTitle(mEventRects.get(i).event, mEventRects.get(i).rectF, canvas, top, left);
                     }
                     else
@@ -846,8 +848,11 @@ public class WeekView extends View {
         // Prepare the name of the event.
         SpannableStringBuilder bob = new SpannableStringBuilder();
         if (event.getName() != null) {
+            bob.append(event.getStartTime().get(Calendar.HOUR) + getDateTimeInterpreter().interpretStartTime() + ":00\n");
+            bob.setSpan(new StyleSpan(Typeface.NORMAL), 0, bob.length(), 0);
+            int bobLength = bob.length();
             bob.append(event.getName());
-            bob.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, bob.length(), 0);
+            bob.setSpan(new StyleSpan(Typeface.BOLD), bobLength, bob.length(), 0);
             bob.append(' ');
         }
 
@@ -857,7 +862,7 @@ public class WeekView extends View {
         }
 
         int availableHeight = (int) (rect.bottom - originalTop - mEventPadding * 2);
-        int availableWidth = (int) (rect.right - originalLeft - mEventPadding * 2);
+        int availableWidth = (int) (rect.right - originalLeft - mEventPadding * 2 - mEventColoredLineWidth);
 
         // Get text dimensions.
         StaticLayout textLayout = new StaticLayout(bob, mEventTextPaint, availableWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
@@ -867,9 +872,12 @@ public class WeekView extends View {
         if (availableHeight >= lineHeight) {
             // Calculate available number of line counts.
             int availableLineCount = availableHeight / lineHeight;
+            if (availableLineCount > 1) {
+                availableLineCount = 1;
+            }
             do {
                 // Ellipsize text to fit into event rect.
-                textLayout = new StaticLayout(TextUtils.ellipsize(bob, mEventTextPaint, availableLineCount * availableWidth, TextUtils.TruncateAt.END), mEventTextPaint, (int) (rect.right - originalLeft - mEventPadding * 2), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+                textLayout = new StaticLayout(TextUtils.ellipsize(bob, mEventTextPaint, 1.5f * availableWidth, TextUtils.TruncateAt.END), mEventTextPaint, (int) (availableWidth), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
 
                 // Reduce line count.
                 availableLineCount--;
@@ -879,7 +887,7 @@ public class WeekView extends View {
 
             // Draw text.
             canvas.save();
-            canvas.translate(originalLeft + mEventPadding, originalTop + mEventPadding);
+            canvas.translate(originalLeft + mEventPadding + mEventColoredLineWidth, originalTop + mEventPadding);
             textLayout.draw(canvas);
             canvas.restore();
         }
