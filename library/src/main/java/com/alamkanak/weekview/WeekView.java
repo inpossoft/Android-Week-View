@@ -21,6 +21,7 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -848,17 +849,31 @@ public class WeekView extends View {
         // Prepare the name of the event.
         SpannableStringBuilder bob = new SpannableStringBuilder();
         if (event.getName() != null) {
-            bob.append(event.getStartTime().get(Calendar.HOUR) + getDateTimeInterpreter().interpretStartTime() + ":00\n");
-            bob.setSpan(new StyleSpan(Typeface.NORMAL), 0, bob.length(), 0);
-            int bobLength = bob.length();
-            bob.append(event.getName());
-            bob.setSpan(new StyleSpan(Typeface.BOLD), bobLength, bob.length(), 0);
-            bob.append(' ');
-        }
-
-        // Prepare the location of the event.
-        if (event.getLocation() != null) {
-            bob.append(event.getLocation());
+            if (mNumberOfVisibleDays == 1) {
+                if (event.getName() != null) {
+                    bob.append(event.getName() + "\n");
+                } else {
+                    bob.append("Name");
+                }
+                bob.setSpan(new ForegroundColorSpan(Color.BLACK), 0, bob.length(), 0);
+                int bobLength = bob.length();
+                if (event.getLocation() != null) {
+                    bob.append(event.getLocation());
+                } else {
+                    bob.append("Location");
+                }
+                bob.setSpan(new ForegroundColorSpan(Color.LTGRAY), bobLength, bob.length(), 0);
+            } else {
+                bob.append(event.getStartTime().get(Calendar.HOUR) + getDateTimeInterpreter().interpretStartTime() + ":00\n");
+                bob.setSpan(new StyleSpan(Typeface.NORMAL), 0, bob.length(), 0);
+                int bobLength = bob.length();
+                if (event.getName() != null) {
+                    bob.append(event.getName());
+                } else {
+                    bob.append("Name");
+                }
+                bob.setSpan(new StyleSpan(Typeface.BOLD), bobLength, bob.length(), 0);
+            }
         }
 
         int availableHeight = (int) (rect.bottom - originalTop - mEventPadding * 2);
