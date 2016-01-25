@@ -24,6 +24,7 @@ import android.text.format.DateFormat;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
@@ -81,6 +82,8 @@ public class WeekView extends View {
     private Paint mTodayHeaderTextPaint;
     private Paint mEventBackgroundPaint;
     private float mHeaderColumnWidth;
+    private List<RectF> mHeaderRects = new ArrayList<RectF>();
+    private Calendar mSelectedDate;
     private List<EventRect> mEventRects;
     private List<? extends WeekViewEvent> mPreviousPeriodEvents;
     private List<? extends WeekViewEvent> mCurrentPeriodEvents;
@@ -262,6 +265,19 @@ public class WeekView extends View {
                 if (selectedTime != null) {
                     playSoundEffect(SoundEffectConstants.CLICK);
                     mEmptyViewClickListener.onEmptyViewClicked(selectedTime);
+                }
+            }
+
+            // If the tap was on daily view header row then change the day
+            if (mNumberOfVisibleDays == 1 && mHeaderRects != null) {
+                int count = 0;
+                for (RectF rect : mHeaderRects) {
+                    if (rect != null && e.getX() > rect.left && e.getX() < rect.right && e.getY() > rect.top && e.getY() < rect.bottom) {
+                        mSelectedDate = getDateTimeInterpreter().interpretStartDate();
+                        mSelectedDate.add(Calendar.DATE, count);
+                        notifyDatasetChanged();
+                    }
+                    count++;
                 }
             }
 
@@ -555,8 +571,7 @@ public class WeekView extends View {
     private void drawHeaderRowAndEvents(Canvas canvas) {
         // Calculate the available width for each day.
         mHeaderColumnWidth = mTimeTextWidth + mHeaderColumnPadding *2;
-        mWidthPerDay = getWidth() - mHeaderColumnWidth - mColumnGap * (mNumberOfVisibleDays - 1);
-        mWidthPerDay = mWidthPerDay/mNumberOfVisibleDays;
+        mWidthPerDay = (getWidth() - mHeaderColumnWidth - mColumnGap * (mNumberOfVisibleDays - 1)) / mNumberOfVisibleDays;
 
         Calendar today = today();
 
@@ -643,10 +658,15 @@ public class WeekView extends View {
              dayNumber++) {
 
             // Check if the day is today.
-            day = getDateTimeInterpreter().interpretStartDate();
-            mLastVisibleDay = (Calendar) day.clone();
-            day.add(Calendar.DATE, dayNumber - 1);
-            mLastVisibleDay.add(Calendar.DATE, dayNumber - 2);
+            if (mNumberOfVisibleDays == 1 && mSelectedDate != null) {
+                day = mSelectedDate;
+            } else {
+                day = getDateTimeInterpreter().interpretStartDate();
+                mLastVisibleDay = (Calendar) day.clone();
+                day.add(Calendar.DATE, dayNumber - 1);
+                mLastVisibleDay.add(Calendar.DATE, dayNumber - 2);
+            }
+
             boolean sameDay = isSameDay(day, today);
 
             // Get more events if necessary. We want to store the events 3 months beforehand. Get
@@ -725,17 +745,25 @@ public class WeekView extends View {
 
         // Draw the header row texts.
         startPixel = startFromPixel;
-        mWidthPerDay = getWidth() - mHeaderColumnWidth - mColumnGap * (mNumberOfVisibleDaysInHeader - 1);
-        mWidthPerDay = mWidthPerDay/mNumberOfVisibleDaysInHeader;
+        mWidthPerDay = (getWidth() - mHeaderColumnWidth - mColumnGap * (mNumberOfVisibleDaysInHeader - 1)) / mNumberOfVisibleDaysInHeader;
+        mHeaderRects.clear();
         for (int dayNumber = 0; dayNumber < mNumberOfVisibleDaysInHeader; dayNumber++) {
             // Check if the day is today.
             day = getDateTimeInterpreter().interpretStartDate();
             day.add(Calendar.DATE, dayNumber);
-            boolean sameDay = isSameDay(day, today);
+            boolean sameDay;
+            if (mSelectedDate != null) {
+                sameDay = isSameDay(day, mSelectedDate);
+            } else {
+                sameDay = isSameDay(day, today);
+            }
+            float start =  (startPixel < mHeaderColumnWidth ? mHeaderColumnWidth : startPixel);
+
+            // Add rect to headerRects list
+            mHeaderRects.add(new RectF(start, 0, startPixel + mWidthPerDay, mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight / 2 + mHeaderMarginBottom));
 
             // Draw header background if it's today
             if (sameDay) {
-                float start =  (startPixel < mHeaderColumnWidth ? mHeaderColumnWidth : startPixel);
                 canvas.drawRect(start, 0, startPixel + mWidthPerDay, mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight / 2 + mHeaderMarginBottom, sameDay ? mTodayHeaderBackgroundPaint : mHeaderBackgroundPaint);
             }
 
