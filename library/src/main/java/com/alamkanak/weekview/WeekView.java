@@ -270,7 +270,7 @@ public class WeekView extends View {
 
             // If the tap was on daily view header row then change the day
             if (mNumberOfVisibleDays == 1 && mHeaderRects != null) {
-                int count = 0;
+                int count = -1;
                 for (RectF rect : mHeaderRects) {
                     if (rect != null && e.getX() > rect.left && e.getX() < rect.right && e.getY() > rect.top && e.getY() < rect.bottom) {
                         mSelectedDate = getDateTimeInterpreter().interpretStartDate();
@@ -747,7 +747,11 @@ public class WeekView extends View {
         startPixel = startFromPixel;
         mWidthPerDay = (getWidth() - mHeaderColumnWidth - mColumnGap * (mNumberOfVisibleDaysInHeader - 1)) / mNumberOfVisibleDaysInHeader;
         mHeaderRects.clear();
-        for (int dayNumber = 0; dayNumber < mNumberOfVisibleDaysInHeader; dayNumber++) {
+        int startDay = 0;
+        if (mNumberOfVisibleDays == 1) {
+            startDay = -1;
+        }
+        for (int dayNumber = startDay; dayNumber < mNumberOfVisibleDaysInHeader; dayNumber++) {
             // Check if the day is today.
             day = getDateTimeInterpreter().interpretStartDate();
             day.add(Calendar.DATE, dayNumber);
@@ -757,14 +761,22 @@ public class WeekView extends View {
             } else {
                 sameDay = isSameDay(day, today);
             }
-            float start =  (startPixel < mHeaderColumnWidth ? mHeaderColumnWidth : startPixel);
+            float start =  mNumberOfVisibleDays == 1 ? startPixel : (startPixel < mHeaderColumnWidth ? mHeaderColumnWidth : startPixel);
 
             // Add rect to headerRects list
-            mHeaderRects.add(new RectF(start, 0, startPixel + mWidthPerDay, mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight / 2 + mHeaderMarginBottom));
+            if (dayNumber == -1) {
+                mHeaderRects.add(new RectF(0, 0, startFromPixel, mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight / 2 + mHeaderMarginBottom));
+            } else {
+                mHeaderRects.add(new RectF(start, 0, startPixel + mWidthPerDay, mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight / 2 + mHeaderMarginBottom));
+            }
 
             // Draw header background if it's today
             if (sameDay) {
-                canvas.drawRect(start, 0, startPixel + mWidthPerDay, mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight / 2 + mHeaderMarginBottom, sameDay ? mTodayHeaderBackgroundPaint : mHeaderBackgroundPaint);
+                if (dayNumber == -1) {
+                    canvas.drawRect(0, 0, startFromPixel, mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight / 2 + mHeaderMarginBottom, sameDay ? mTodayHeaderBackgroundPaint : mHeaderBackgroundPaint);
+                } else {
+                    canvas.drawRect(start, 0, startPixel + mWidthPerDay, mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight / 2 + mHeaderMarginBottom, sameDay ? mTodayHeaderBackgroundPaint : mHeaderBackgroundPaint);
+                }
             }
 
             // Draw the day labels.
@@ -774,13 +786,23 @@ public class WeekView extends View {
 
             String newLine = "\n";
             if (dayLabel.contains(newLine)) {
-                canvas.drawText(dayLabel.substring(0, dayLabel.indexOf(newLine)), startPixel + mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding - mHeaderTextHeight / 1.7f, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
-                canvas.drawText(dayLabel.substring(dayLabel.indexOf(newLine)), startPixel + mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding + mHeaderTextHeight / 1.3f, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
+                if (dayNumber == -1) {
+                    canvas.drawText(dayLabel.substring(0, dayLabel.indexOf(newLine)), mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding - mHeaderTextHeight / 1.7f, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
+                    canvas.drawText(dayLabel.substring(dayLabel.indexOf(newLine)), mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding + mHeaderTextHeight / 1.3f, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
+                } else {
+                    canvas.drawText(dayLabel.substring(0, dayLabel.indexOf(newLine)), startPixel + mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding - mHeaderTextHeight / 1.7f, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
+                    canvas.drawText(dayLabel.substring(dayLabel.indexOf(newLine)), startPixel + mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding + mHeaderTextHeight / 1.3f, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
+                }
             } else {
-                canvas.drawText(dayLabel, startPixel + mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
+                if (dayNumber == -1) {
+                    canvas.drawText(dayLabel, mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
+                } else {
+                    canvas.drawText(dayLabel, startPixel + mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
+                }
             }
-
-            startPixel += mWidthPerDay + mColumnGap;
+            if (dayNumber != -1) {
+                startPixel += mWidthPerDay + mColumnGap;
+            }
         }
 
     }
